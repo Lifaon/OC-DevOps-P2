@@ -1,3 +1,7 @@
+app:
+  jwt-period: 86400000
+  jwt-secret: my-jwt-secret-that-should-be-set-dynamically-in-production
+
 spring:
   application:
     name: etudiant-backend

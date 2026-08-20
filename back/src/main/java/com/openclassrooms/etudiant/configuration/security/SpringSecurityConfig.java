@@ -1,7 +1,14 @@
 package com.openclassrooms.etudiant.configuration.security;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,14 +20,26 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SpringSecurityConfig {
 
-    @Autowired
-    private CustomUserDetailService customUserDetailService;
+	final private CustomUserDetailService customUserDetailService;
+
+	@Value("${app.jwt-secret}")
+	private String keyString;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -39,6 +58,31 @@ public class SpringSecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+	@Bean
+	public JwtEncoder jwtEncoder() {
+		SecretKey key = new SecretKeySpec(
+				keyString.getBytes(StandardCharsets.UTF_8),
+				"HmacSHA256"
+		);
+		OctetSequenceKey jwk = new OctetSequenceKey.Builder(key)
+				.algorithm(JWSAlgorithm.HS256)
+				.build();
+		JWKSource<SecurityContext> source = new ImmutableJWKSet<>(new JWKSet(jwk));
+		return new NimbusJwtEncoder(source);
+	}
+
+	@Bean
+	public JwtDecoder jwtDecoder() {
+		SecretKey key = new SecretKeySpec(
+				keyString.getBytes(StandardCharsets.UTF_8),
+				"HmacSHA256"
+		);
+		return NimbusJwtDecoder
+				.withSecretKey(key)
+				.macAlgorithm(MacAlgorithm.HS256)
+				.build();
+	}
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
