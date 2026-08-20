@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: etudiant-backend
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+logging:
+  level:
+    org:
+      hibernate:
+        type: info
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: info
+    com:
+      openclassrooms:
+        etudiant: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
