@@ -3,9 +3,12 @@ package com.openclassrooms.etudiant.controller;
 import com.openclassrooms.etudiant.dto.LoginRequestDTO;
 import com.openclassrooms.etudiant.dto.RegisterDTO;
 import com.openclassrooms.etudiant.mapper.UserDtoMapper;
+import com.openclassrooms.etudiant.service.JwtService;
 import com.openclassrooms.etudiant.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.SameSiteCookies;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +25,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
     private final UserDtoMapper userDtoMapper;
 
     @PostMapping("/api/register")
@@ -32,10 +36,10 @@ public class UserController {
 
     @PostMapping("/api/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
+
         String jwtToken = userService.login(loginRequestDTO.getLogin(), loginRequestDTO.getPassword());
-		Map<String, String> body = new HashMap<>();
-		body.put("jwt", jwtToken);
-        return ResponseEntity.ok(body);
+		Cookie cookie = jwtService.getCookieFromToken(jwtToken);
+        return ResponseEntity.ok(cookie);
     }
 
 
