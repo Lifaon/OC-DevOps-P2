@@ -1,5 +1,5 @@
+/// <reference types="jest" />
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { LoginComponent } from './login.component';
 import { provideHttpClient } from '@angular/common/http';
 import { UserService } from '../../core/service/user.service';
@@ -27,4 +27,5 @@ describe('LoginComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
 });

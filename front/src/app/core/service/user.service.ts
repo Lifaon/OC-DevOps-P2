@@ -17,4 +17,8 @@ export class UserService {
   login(user: Login): Observable<Object> {
     return this.httpClient.post('/api/login', user);
   }
+
+  read(): Observable<Object> {
+    return this.httpClient.get('/api/user/read/3');
+  }
 }
