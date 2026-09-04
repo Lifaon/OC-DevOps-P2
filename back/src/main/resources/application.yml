@@ -1,6 +1,7 @@
 app:
   jwt-period: 86400000
   jwt-secret: my-jwt-secret-that-should-be-set-dynamically-in-production
+  jwt-cookie-name: authToken
 
 spring:
   application:

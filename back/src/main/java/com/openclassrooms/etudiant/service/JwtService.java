@@ -1,17 +1,15 @@
 package com.openclassrooms.etudiant.service;
 
 
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.http.SameSiteCookies;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
@@ -39,13 +37,4 @@ public class JwtService {
 		return jwtEncoder.encode(JwtEncoderParameters.from(headers, claims)).getTokenValue();
     }
 
-	public Cookie getCookieFromToken(String jwt) {
-		Cookie cookie = new Cookie("jwt", jwt);
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setPath("/");
-		cookie.setMaxAge(period);
-		cookie.setAttribute("SameSite", SameSiteCookies.STRICT.getValue());
-		return cookie;
-	}
 }

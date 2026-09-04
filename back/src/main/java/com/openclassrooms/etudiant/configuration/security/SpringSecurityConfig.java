@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +26,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.SecretKey;
@@ -40,6 +42,8 @@ public class SpringSecurityConfig {
 
 	@Value("${app.jwt-secret}")
 	private String keyString;
+	@Value("${app.jwt-cookie-name}")
+	private String cookieName;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -98,6 +102,10 @@ public class SpringSecurityConfig {
                         // Others protected routes will be added here.
                         .anyRequest().authenticated()
                 )
+				.oauth2ResourceServer(oauth2 -> oauth2
+						.jwt(Customizer.withDefaults())
+				)
+				.addFilterBefore(new CookieToAuthHeaderFilter(cookieName), BearerTokenAuthenticationFilter.class)
                 // .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(
                         (request, response, exception) -> {

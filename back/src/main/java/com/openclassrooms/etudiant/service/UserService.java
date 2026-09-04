@@ -5,11 +5,15 @@ import com.openclassrooms.etudiant.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -49,5 +53,16 @@ public class UserService {
         }
     }
 
+	public Optional<User> findByLogin(String login) {
+		return userRepository.findByLogin(login);
+	}
+
+	public Optional<User> find(Long id) {
+		return userRepository.findById(id);
+	}
+
+	public List<User> findAll() {
+		return userRepository.findAll();
+	}
 
 }
