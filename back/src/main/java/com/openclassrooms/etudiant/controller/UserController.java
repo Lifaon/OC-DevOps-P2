@@ -2,6 +2,7 @@ package com.openclassrooms.etudiant.controller;
 
 import com.openclassrooms.etudiant.dto.LoginRequestDTO;
 import com.openclassrooms.etudiant.dto.RegisterDTO;
+import com.openclassrooms.etudiant.dto.UserRequestDTO;
 import com.openclassrooms.etudiant.dto.UserResponseDTO;
 import com.openclassrooms.etudiant.entities.User;
 import com.openclassrooms.etudiant.mapper.UserDtoMapper;
@@ -14,9 +15,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -65,15 +68,26 @@ public class UserController {
 
 	@GetMapping("/api/user/read/")
 	public ResponseEntity<?> readAll() {
-		List<User> users = userService.findAll();
+		List<User> users = userService.getAll();
 		List<UserResponseDTO> list = users.stream().map(UserResponseDTO::fromEntity).toList();
 		return ResponseEntity.ok(list);
 	}
 
 	@GetMapping("/api/user/read/{id}")
 	public ResponseEntity<?> read(@PathVariable Long id) {
-		User user = userService.find(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		User user = userService.get(id);
 		return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
+	}
+
+	@PutMapping("/api/user/update/{id}")
+	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UserRequestDTO dto) {
+		User user = userService.edit(id, dto);
+		return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
+	}
+
+	@DeleteMapping("/api/user/delete/{id}")
+	public ResponseEntity<?> delete(@PathVariable Long id) {
+		userService.delete(id);
+		return ResponseEntity.noContent().build();
 	}
 }
