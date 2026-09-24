@@ -1,6 +1,6 @@
-export interface Register {
+export interface UserUpdate {
   firstName: string,
   lastName: string,
   login: string,
-  password: string
+  password: string | null
 }

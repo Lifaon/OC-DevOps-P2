@@ -1,0 +1,61 @@
+@if (errorMessage) {
+<div class="alert alert-danger m-3" role="alert">
+  {{ errorMessage }}
+  <button type="button" class="close" aria-label="Close" (click)="errorMessage = null">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+}
+
+@if (showForm) {
+<app-user-form
+  [user]="editedUser"
+  [title]="editedUser ? 'Edit User' : 'Create User'"
+  [submitLabel]="editedUser ? 'Save' : 'Create'"
+  (created)="createUser($event)"
+  (updated)="updateUser($event)"
+  (cancelled)="onCancel()"
+/>
+}
+
+<div class="card m-3">
+  <h5 class="card-header d-flex justify-content-between align-items-center">
+    Users
+    <button class="btn btn-primary btn-sm" type="button" (click)="onCreate()">Add User</button>
+  </h5>
+  <div class="card-body">
+    @if (users.length) {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Login</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users; track user.id) {
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.firstName }}</td>
+          <td>{{ user.lastName }}</td>
+          <td>{{ user.login }}</td>
+          <td>{{ user.createdAt | date: 'medium' }}</td>
+          <td>{{ user.updatedAt | date: 'medium' }}</td>
+          <td>
+            <button class="btn btn-primary mr-1" type="button" (click)="onEdit(user)">Edit</button>
+            <button class="btn btn-secondary" type="button" (click)="onDelete(user)">Delete</button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    } @else {
+    <p>No users found.</p>
+    }
+  </div>
+</div>
