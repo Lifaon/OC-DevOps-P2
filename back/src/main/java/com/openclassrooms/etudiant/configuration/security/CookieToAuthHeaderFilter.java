@@ -55,6 +55,8 @@ public class CookieToAuthHeaderFilter extends OncePerRequestFilter {
 
 	private String extractTokenFromCookie(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
+		if (cookies == null)
+			return null;
 		return Arrays.stream(cookies)
 				.filter(cookie -> cookie.getName().equals(cookieName))
 				.map(Cookie::getValue)

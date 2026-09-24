@@ -6,11 +6,13 @@ import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -88,30 +90,41 @@ public class SpringSecurityConfig {
 				.build();
 	}
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	static private HttpSecurity baseChain(HttpSecurity http) throws Exception {
+		return http
+				.cors(AbstractHttpConfigurer::disable)
+				.csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+	}
+
+	@Bean
+	@Order(1)
+    public SecurityFilterChain publicChain(HttpSecurity http) throws Exception {
+		return baseChain(http)
+				.securityMatcher(
+						"/api/register",
+						"/api/login",
+						"/actuator/**"
+				)
+				.authorizeHttpRequests(a -> a.anyRequest().permitAll())
+				.build();
+	}
+
+	@Bean
+	@Order(2)
+    public SecurityFilterChain securedChain(HttpSecurity http) throws Exception {
+        return baseChain(http)
                 .authenticationProvider(authenticationProvider())
-                .authorizeHttpRequests(authorize -> authorize
-                        // No auth needed on :
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/register", "/api/login").permitAll()
-                        // Others protected routes will be added here.
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
 				.oauth2ResourceServer(oauth2 -> oauth2
 						.jwt(Customizer.withDefaults())
 				)
 				.addFilterBefore(new CookieToAuthHeaderFilter(cookieName), BearerTokenAuthenticationFilter.class)
-                // .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(
                         (request, response, exception) -> {
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getMessage());
-                        }));
-        return http.build();
+                        }))
+				.build();
     }
 
 }
