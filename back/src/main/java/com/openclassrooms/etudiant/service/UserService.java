@@ -30,7 +30,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public void register(User user) {
+    public User register(User user) {
         Assert.notNull(user, "User must not be null");
 
         if (repo.existsByLogin(user.getLogin())) {
@@ -43,6 +43,7 @@ public class UserService {
 		user.setUpdated_at(now);
         user = repo.save(user);
 		log.debug("User {} created", user.getId());
+		return user;
     }
 
     public String login(String login, String password) {

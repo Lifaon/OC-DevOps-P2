@@ -66,6 +66,12 @@ public class UserController {
 				.build();
     }
 
+	@PostMapping("/api/user/create")
+	public ResponseEntity<?> create(@Valid @RequestBody RegisterDTO registerDTO) {
+		User user = userService.register(userDtoMapper.toEntity(registerDTO));
+		return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
+	}
+
 	@GetMapping("/api/user/read/")
 	public ResponseEntity<?> readAll() {
 		List<User> users = userService.getAll();
